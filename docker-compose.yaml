@@ -1,0 +1,44 @@
+version: '3'
+
+# Services defines the list of containers we will be running.
+# Each service defines settings for a container
+services:
+
+# The master service will run the container wich runs roscore
+  master:
+    # Define which image to use. The "ros:kinetic-ros-core" image contains everything needed for runnin roscore.
+    image: ros:kinetic-ros-core
+    # The name of the container that is created. This is important to set, otherwise it will be dynamically allocated and might not math the "ROS_HOSTNAME" variable
+    container_name: master
+    # The command just tells which command should be running in the container
+    command:
+      - roscore
+
+  # The talker service will run the package that we built. It will be running the talker module.
+  talker:
+    # Note that this is the image that you built earlier
+    image: my-beginner-tutorial
+    # The name of the container that is created. This is important to set, otherwise it will be dynamically allocated and might not math the "ROS_HOSTNAME" variable
+    container_name: talker
+    # Environment lets us specify environment variables.
+    environment:
+      # Note that this hostname must match the containername
+      - "ROS_HOSTNAME=talker"
+      # This url must match the name of the master service.
+      - "ROS_MASTER_URI=http://master:11311"
+    # The command just tells which command should be running in the container
+    command: rosrun beginner_tutorials talker __name:=talker
+
+  # The talker service will run the package that we built. It will be running the listener module.
+  listener:
+  # Note that this is the image that you built earlier
+    image: my-beginner-tutorial
+    # The name of the container that is created. This is important to set, otherwise it will be dynamically allocated and might not math the "ROS_HOSTNAME" variable
+    container_name: listener
+    environment:
+    # Note that this hostname must match the containername
+      - "ROS_HOSTNAME=listener"
+    # This url must match the name of the master service.
+      - "ROS_MASTER_URI=http://master:11311"
+    # The command just tells which command should be running in the container
+    command: rosrun beginner_tutorials listener __name:=listener
